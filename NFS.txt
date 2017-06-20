@@ -1,0 +1,18 @@
+SERVER 
+(generic)
+mkdir /nfs_public
+vi /etc/exports
+	/myshare desktop(rw), *.exapmle.com 
+exportfs -r 
+systemctl start nfs-server
+	^start^enable 
+firewall-cmd --add-service nfs --permanent 
+firewall-cmd --reload 
+
+CLIENT
+(generic)
+mkdir /mnt/nfs
+mount server1:/nfs_public /mnt/nfs
+ 
+
+https://stackoverflow.com/questions/20585920/how-to-add-multiple-values-to-a-dictionary-key-in-python
