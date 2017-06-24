@@ -1,51 +1,54 @@
    SERVER 
   (generic)
-mkdir /nfs_public																	#create export dir 
-echo "/myshare desktop(rw), *.exapmle.com" >> /etc/exports                          #edit export info for access 
-exportfs -r 																		#sync /var/lib/nfs/etab with /etc/exports
-systemctl start nfs-server														#initiate and enable service 
+yum install nfs-utils 
+systemctl start nfs-server														    #initiate and enable service 
 	^start^enable 
+mkdir /nfs_public																	#create export dir 
+chwon nfsnobody /myshare
+echo "/myshare desktop(rw)" >> /etc/exports                          #edit export info for access 
+exportfs -r 																		#sync /var/lib/nfs/etab with /etc/exports
 firewall-cmd --add-service nfs --permanent  										#permit firewall access 
 firewall-cmd --reload 
-  (secure)
-wget -O /etc/krb5.keytab http://classroom.example.com/pub/keytabs/server1.keytab	#import keytab for auth exchange 
-vi /etc/sysconfg/nfs																#enforce selinux context for export
-	RPCNFSDARGS="-V 4.2"
-mkdir -p /secureexport 																#create export dir
-echo "/secureexport *.example.com(sec=krb5p,rw)' >> /etc/exports"					#add export to fstab
-exportfs -r																			#sync /var/lib/nfs/etab with entries in /etc/exports 
-systemctl restart nfs-server														#restart existing service,start & enable secure service 
-systemctl start nfs-secure-server			
-^start^enable  														
-firewall-cmd --add-service nfs --permanent 											#permit firewall access
-firewall-cmd --reload
-echo "test" >>/secureexport/test													#create test file 
-chcon -t public_content_t /secureexport/test										#change selinux context 
-chown ldapuser1:ldapuser1
-chmod 664 /secureexport/test														#give u,g rw access
-
-============================================
+ 
    CLIENT
   (generic)
 mkdir -p /mnt/nfsshare																#create mount dir
 echo "server1:/myshare /mnt/nfsshare nfs defaults 0 0"  >> /etc/exports     		#append mount info to /etc/fstab 
 mount -a 																			#verify mounting capabilities 
-echo "test" >> /mnt/nfsshare/test 														#verfiy rw abilities for said user 
+echo "test" >> /mnt/nfsshare/test 													#verfiy rw abilities for said user 
 cat /mnt/nfsshare/test
 umount /mnt/nfsshare
+============================================
+   SERVER
+  (secure)
+wget -O /etc/krb5.keytab http://classroom.example.com/pub/keytabs/server1.keytab	#import keytab for auth exchange 
+vi /etc/sysconfg/nfs																#enforce selinux context for export
+	RPCNFSDARGS="-V 4.2"
+systemctl start nfs-secure-server													#start & enable secure service 
+^start^enable  														
+mkdir -p /nfssec 																#create export dir
+echo "/nfssec *.example.com(sec=krb5p,rw)' >> /etc/exports"					#add export to fstab
+exportfs -r																			#sync /var/lib/nfs/etab with entries in /etc/exports 
+systemctl restart nfs-secure nfs													#restart existing service,start & enable secure service 
+firewall-cmd --add-service nfs --permanent 											#permit firewall access
+firewall-cmd --reload
++. later test 
+echo "test" >>/secureexport/test													#create test file 
+chcon -t public_content_t /secureexport/test										#change selinux context 
+chown ldapuser1:ldapuser1
+chmod 664 /secureexport/test														#give u,g rw access
+
+   CLIENT
   (secure)
 yum install nfs-utils
 wget -O /etc/krb5.keytab http://classroom.example.com/pub/keytabs/desktop1.keytab   #import keyab for all server/client data exchange
-mkdir /mnt/secureexport																#create mount point 
+mkdir /mnt/secure   																#create mount point 
 systemctl start nfs-secure 															#start & enable secure mount service 
 ^start^enable 
-mount -o sec=krb5p server1://secureexport /mnt/secureexport							#verify mounting capabilities
-umount /mnt/secureexport
-mount -o sec=krb5p,v4.2 server1://secureexport /mnt/secureexport					#mount enforcing selinux contexts 
-ls -Z /mnt/secureexport/test
-umount /mnt/secureexport
-echo "server1:/secureexport /mnt/secureshare nfs defaults,sec=krb5p,v4.2 0 0" >> /etc/fstab
+echo "server1:/nfssec /mnt/secure nfs defaults,sec=krb5p,v4.2 0 0" >> /etc/fstab    #mount enforcing selinux contexts 
 mount -a 
++. test 
+ls -Z /mnt/secure/test
 echo "test" >> /mnt/secureexport/test
 cat /mnt/secureexport/test
 ssh ldapuser@desktop1
@@ -60,5 +63,5 @@ https://stackoverflow.com/questions/20585920/how-to-add-multiple-values-to-a-dic
 script in /etc/rc0.d/  
 /etc/init.d 
 	echo "umount -a"
-update-rc.d /etc/init.d/myservice defaults
+vi /etc/update-rc.d /etc/init.d/myservice defaults
 

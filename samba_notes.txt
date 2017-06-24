@@ -3,17 +3,17 @@ mkdir -p /smbshare											#mkdir
 groupadd -r marketing  										#add group, -r system only  			
 chgrp marketing /smbshare 									#change group owner ship of file 
 chmod 2775 /smbshare 										#2-group id, 7-owner perms (r,w,x), 7-users in group perms(rwx), 5-perms for all others (r,x)  
-semanage fcontext -a -t samba_share_t '/smbshare(/.*)?'		# set secontext to automaitcally label with smb_share_t with restorecon 
+semanage fcontext -a -t samba_share_t '/smbshare(/.*)?'		#set secontext to automaitcally label with smb_share_t with restorecon 
 restorecon -vvFR  /smbshare									#recursuvely set label for all items in dir 
 vi /etc/samba/smb.conf 										#edit the config file 
   [global]				
   workgroup = MYCOMPANY										#set appropriate workgroup
-  security = user												#state that only users with valid login creds can access share 			
-  hosts allow = .example.com									#specify which hosts can access share 
-  [smbshare]													#create header for the share 
+  security = user											#state that only users with valid login creds can access share 			
+  hosts allow = .example.com								#specify which hosts can access share 
+  [smbshare]												#create header for the share 
   path = /smbshare 											#specify path of share 
   writable = no												#deny write abilities by default 
-  write list = @marketing                                     #specify group that can write 
+  write list = @marketing                                   #specify group that can write 
 testparm 													#test paramater in smb.conf 
 useradd -s /sbin/nologin brian -G marketing 				#add user with no ssh access & part of group 
   ^brian^rob

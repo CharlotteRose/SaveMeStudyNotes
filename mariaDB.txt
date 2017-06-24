@@ -8,15 +8,16 @@ mysql_secure_installation												#configure secure installation
 firewall-cmd --add-service mysql --permanent 							#permit firewall access
 firewall-cmd --reload 
 mysql -u root -p 														#connect ot db (must use -p for password)
-=> show databases; 															
-=>CREATE USER <name@localhost> IDENTIFIED by '<password>';
-=>GRANT SELECT, UPDATE, DELETE, INSERT on <db.table> to user@localhost;
-=>mysql - u <name> -p  
 =>CREATE DATABASE <dbname>; 
 =>exit
-=>mysql -u root -p <dbname> < /mysql/maria.dump							#create db from logical backup 
-=>mysql - u <name> -p  													#access db
+mysql -u root -p <dbname> < /mysql/maria.dump							#create db from logical backup 
+mysql -u root -p  										     			#access db
 =>USE <dbname>; 												        #user to verify successful restoration 
 =>SHOW TABLES;
 =>DESCRIBE <tableName>; 
 =>SELECT * <table> WHERE <attribute> {>(=), <(=), =, !=} <value>;
+=> show databases; 															
+=>CREATE USER <name@localhost> IDENTIFIED by '<password>';
+=>GRANT SELECT, UPDATE, DELETE, INSERT on <db.table> to user@localhost;
+=>mysql - u <name> -p  
+
