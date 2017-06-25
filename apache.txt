@@ -1,0 +1,17 @@
+*GET*HEAD*POST requests 
+*http://localhost/manual
+SERVER 
+(generic) 
+yum install httpd http-tools httpd-manual 		#install pckgs 
+vi /etc/httpd/httpd.conf
+	ServerAdmin webmaster@server1.example.com
+echo "Hello World" >> /var/www/html/index.html/index
+systemctl start httpd
+^start^enable
+firewall-cmd --add-service httpd --permanenet
+firewall-cmd --reload
+
+client : curl -k serverw.example.com/index.html
+		 curl -k server1.example.com/manual 
+		 
+(virtual hosting)

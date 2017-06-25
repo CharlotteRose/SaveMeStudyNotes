@@ -26,28 +26,30 @@ vi /etc/sysconfg/nfs																#enforce selinux context for export
 	RPCNFSDARGS="-V 4.2"
 systemctl start nfs-secure-server													#start & enable secure service 
 ^start^enable  														
-mkdir -p /nfssec 																#create export dir
-echo "/nfssec *.example.com(sec=krb5p,rw)' >> /etc/exports"					#add export to fstab
+mkdir /nfssec 		   																#create export dir
+echo "/nfssec desktop1(sec=krb5p,rw)' >> /etc/exports"		    					#add export to fstab
 exportfs -r																			#sync /var/lib/nfs/etab with entries in /etc/exports 
-systemctl restart nfs-secure nfs													#restart existing service,start & enable secure service 
 firewall-cmd --add-service nfs --permanent 											#permit firewall access
 firewall-cmd --reload
-+. later test 
-echo "test" >>/secureexport/test													#create test file 
-chcon -t public_content_t /secureexport/test										#change selinux context 
-chown ldapuser1:ldapuser1
-chmod 664 /secureexport/test														#give u,g rw access
 
    CLIENT
   (secure)
 yum install nfs-utils
 wget -O /etc/krb5.keytab http://classroom.example.com/pub/keytabs/desktop1.keytab   #import keyab for all server/client data exchange
-mkdir /mnt/secure   																#create mount point 
 systemctl start nfs-secure 															#start & enable secure mount service 
 ^start^enable 
+mkdir /mnt/secure   																#create mount point 
 echo "server1:/nfssec /mnt/secure nfs defaults,sec=krb5p,v4.2 0 0" >> /etc/fstab    #mount enforcing selinux contexts 
 mount -a 
-+. test 
+
+=============
+TEST SERVER
+echo "test" >>/secureexport/test													#create test file 
+chcon -t public_content_t /secureexport/test										#change selinux context 
+chown ldapuser1:ldapuser1
+chmod 664 /secureexport/test														#give u,g rw access
+
+CLIENT 
 ls -Z /mnt/secure/test
 echo "test" >> /mnt/secureexport/test
 cat /mnt/secureexport/test
@@ -56,12 +58,9 @@ echo "test" >> /mnt/secureexport/test
 cat /mnt/secureexport/test
 
 
+
 https://stackoverflow.com/questions/20585920/how-to-add-multiple-values-to-a-dictionary-key-in-python
-
-
-
 script in /etc/rc0.d/  
 /etc/init.d 
 	echo "umount -a"
 vi /etc/update-rc.d /etc/init.d/myservice defaults
-
