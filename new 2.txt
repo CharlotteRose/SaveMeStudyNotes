@@ -1,0 +1,23 @@
+samba 
+yum install samba samba-client 
+mkdir -p /samba
+groupadd -r sales
+chgrp sales /samba
+chmod 2775 /samba
+semanage fcontext -a -t samba_share_t '/samba(/.*)?'
+restorecon -vvFR
+useradd -s /sbin/nologin -G sales user
+smbpasswd -a user
+vi /etc/sambs/smb.conf
+	workgroup 	security	[share]	path	writelist
+systemctl start smb nmb 
+^start^enable
+firewall-cmd --add-service samba --permanent
+firewall-cmd --reload 
+
+yum install cifs-utils
+mkdir /mnt/smb
+mount - o username=user //server1/samba /mnt/smb
+umount 
+echo "//server1/samba /mnt/smb multiuser,sec=ntlmssp,defaults 0 0" >> /etc/fstab
+mount -a 

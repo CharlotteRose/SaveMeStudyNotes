@@ -13,7 +13,7 @@ mysql -u root -p 														#connect ot db (must use -p for password)
 mysql -u root -p <dbname> < /mysql/maria.dump							#create db from logical backup 
 mysql -u root -p  										     			#access db
 =>USE <dbname>; 												        #user to verify successful restoration 
-=>SHOW TABLES;
+=>SHOW TABLES;															
 =>DESCRIBE <tableName>; 
 =>SELECT * <table> WHERE <attribute> {>(=), <(=), =, !=} <value>;
 => show databases; 															

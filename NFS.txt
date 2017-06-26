@@ -5,7 +5,7 @@ systemctl start nfs-server														    #initiate and enable service
 	^start^enable 
 mkdir /nfs_public																	#create export dir 
 chwon nfsnobody /myshare
-echo "/myshare desktop(rw)" >> /etc/exports                          #edit export info for access 
+echo "/myshare desktop(rw)" >> /etc/exports                                         #edit export info for access 
 exportfs -r 																		#sync /var/lib/nfs/etab with /etc/exports
 firewall-cmd --add-service nfs --permanent  										#permit firewall access 
 firewall-cmd --reload 

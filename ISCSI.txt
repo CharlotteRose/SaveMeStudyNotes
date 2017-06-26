@@ -1,0 +1,37 @@
+SERVER
+yum install targetcli
+systemctl start target
+^start^enable
+^enable^restart
+firwall-cmd --add-port 3260/tcp
+firewall-cmd --reload
+fdisk /dev/vdb - 8e
+pvcreate /dev/vdb1
+vgcreate vg /dev/vdb1
+lvcreate -n lv -l +100%FREE /vg
+targetcli
+	cd backstores/block > create iscsi.disk /dev/vdb1
+	cd ../ create iqn 
+		iqn.yyyy-mm.com.example:server1
+	cd ../iqn/.../tpg/acls
+		create iqn.yyyy-mm.com.example:desktop1
+	cd ../luns
+		create /backstores/block/server1
+	cd ../portals 
+		create public.ip 
+exit
+
+CLIENT 
+yum install iscsi-initiator-utils
+echo "iqn.yyyy-mm.com.example:desktop1" >> /etc/iscsi/initatorname.iscsi
+systemctl start iscsi
+^start^enable
+iscsiadm -m discovery -t st -p server1_ip
+iscsiadm -m node -T iqn.yyyy-mm.com.example:server1 -p server_ip -l 
+lsblk
+iscsiadm -m session -P 3
+cd /var/lib/iscsi/nodes
+mkfs -t xfs /dev/sda
+mkdir /iscsi
+echo "iscsi_UUID /mnt/iscsi xfs _netdev 0 2 >> /etc/exports"
+mount /mnt/iscsi 

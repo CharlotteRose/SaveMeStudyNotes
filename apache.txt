@@ -1,17 +1,103 @@
-*GET*HEAD*POST requests 
-*http://localhost/manual
 SERVER 
 (generic) 
-yum install httpd http-tools httpd-manual 		#install pckgs 
-vi /etc/httpd/httpd.conf
-	ServerAdmin webmaster@server1.example.com
-echo "Hello World" >> /var/www/html/index.html/index
-systemctl start httpd
+yum install httpd http-tools httpd-manual 		     	#install pckgs 
+vi /etc/httpd/httpd.conf								#edit server admin 
+	ServerAdmin webmaster@server1.example.com			
+echo "Hello World" >> /var/www/html/index.html/index	#info for page  	
+systemctl start httpd									#start & enable service
 ^start^enable
-firewall-cmd --add-service httpd --permanenet
+firewall-cmd --add-service httpd --permanenet			#permit firewall access 
 firewall-cmd --reload
 
-client : curl -k serverw.example.com/index.html
+client : curl -k serverw.example.com/index.html			#ensure client can access content 
 		 curl -k server1.example.com/manual 
-		 
+============================================================================================
 (virtual hosting)
+mkdir -p /srv/default/www
+echo "hello world" >> /srv/default/www/index.html 
+restorecon -vR /srv/
+vi /etc/httpd/conf.d/00-default.conf	
+	<VirtualHost _default_:80>
+		DocumentRoot /srv/default/www
+		CustomLog "/var/log/00-default" combined 
+	</VirtualHost>
+	<Directory /srv/default/www>
+		Require all granted
+	</Directory> 
+
+mkdir -p /srv/www1.example.com/www
+echo "this is it" >> /srv/www1.example.com/www/index.htmls
+restorecon -vR /srv/
+vi /etc/httpd/conf.d/www1-example.conf
+	<VirtualHost *:80> 
+		DocumentRoot /srv/www1.example.com/www
+		CustomLog "/var/log/www1.log" combined 
+		ServerName www1.example.com
+		ServerAlias www1
+	</VirtualHost> 
+	<Directory /srv/www1.example.com/www>
+		Require all granted 
+	</Directory> 
+systemctl restart http 
+- Go to server site and test 
+============================================================================================
+(tls) 
+yum install mod_ssl
+	rpm -ql mod_ssl
+mkdir -p /srv/{www,webapp}1/www
+echo "secure" >> /srv/www1/www/index.html
+^www1^webapp1
+restorecon -vR /srv/
+cd /etc/pki/tls/certs
+wget http://.../pub/example-ca.crt
+wget http://.../pub/tls/certs/www1.crt
+wget http://.../pub/tls/certs/webapp1.crt
+cd ../private
+wget http://.../pub/tls/private/www1.key
+wget http://.../pub/tls/private/webapp1.key
+chmod 0400 w*.key
+cat /etc/httpd/conf.d/ssl.conf >> /etc/httpd/conf.d/www1.conf
+	Shift + V  |  delete extraneous information
+	<Directory /srv/www1/www>
+		Require All granted
+	</Directory> 
+	<VitualHost _default_:80>
+		ServerName www1.example.com
+		RewriteEngine on
+		RewriteRule ^(/.*)$ https://%{HTTP_HOST}$1 [redirect=301]
+	</VirtualHost> 
+cp /etc/httpd/conf.d/ww1 /etc/httpd/conf.d/webapp1
+sed -i 's/www1/webapp1/g' /etc/httpd/conf.d/webapp1.conf
+systemctl start httpd
+^start^enable
+firewall-cmd --add-service http --permanent 
+firewall-cmd --reload 
+
+Client - wget http://.../pub/example-ca.crt 
+	
+*!*!*!*!*!*!* BOMB ASS GANGSTER SHIT FOR LINUX *!*!*!*!*!*!*
+			sslProtocol all -SSLv{2,3}  #cut that out-dated insecure bs from yo life
+			rpm -ql <pckg_name> 		#get all da files you cant remember but ya gotta edit 
+			cat ssl.conf >> /wwwX.conf	#aint nobody got time to line by line this beast - use what yum gave ya
+			
+	
+
+
+
+
+
+
+
+(write privileges)
+setfacl -R -m g:g_name:rwX /var/www/html/index			#set write perms for current instance 
+setfacl -R -m d:g:g_name:rwX /var/www/html  			#set default for furture content to be writable 
+OR 
+mkdir -p -m 2775 /ne/dir
+chgrp g_name /new/dir 
+
+
+
+
+
+*GET*HEAD*POST requests 
+*http://localhost/manual
