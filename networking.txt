@@ -1,0 +1,14 @@
+ip addr show 
+ss -A inet -n 
+netstat -46n 
+nmcli con mod eth0 ipv6.addresses 'i.p.v.6/64 i.p.v.6' 
+nmcli con mod ipv6.method manual 
+
+++++++++++++++++++++++++++++++++
+nmcli con add type team con-name team0 ifname team0 config '{"runner":{"name":"activebackup"}}' 
+nmcli con mod team0 ipv4.address i.p.v.6/24
+nmcli con mod team0 ipv4.method manual 
+nmcli con add type team-slave con-name team0-slave1 master team0 ifname eth1 
+nmcli con add type team-slave con-name team0-slave2 master team0 ifname eth2
+nmcli con up team0 
+teamdctl team0 state 

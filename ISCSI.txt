@@ -1,3 +1,6 @@
+***************
+*MAN TARGETCLI*
+***************
 SERVER
 yum install targetcli
 systemctl start target
@@ -11,7 +14,7 @@ vgcreate vg /dev/vdb1
 lvcreate -n lv -l +100%FREE /vg
 targetcli
 	cd backstores/block > create iscsi.disk /dev/vdb1
-	cd ../ create iqn 
+	cd /iscsi create iqn 
 		iqn.yyyy-mm.com.example:server1
 	cd ../iqn/.../tpg/acls
 		create iqn.yyyy-mm.com.example:desktop1
@@ -19,8 +22,12 @@ targetcli
 		create /backstores/block/server1
 	cd ../portals 
 		create public.ip 
-exit
+	saveconfig 
+	exit
 
+**************
+*MAN ISCSIADM*
+**************	
 CLIENT 
 yum install iscsi-initiator-utils
 echo "iqn.yyyy-mm.com.example:desktop1" >> /etc/iscsi/initatorname.iscsi
@@ -29,9 +36,13 @@ systemctl start iscsi
 iscsiadm -m discovery -t st -p server1_ip
 iscsiadm -m node -T iqn.yyyy-mm.com.example:server1 -p server_ip -l 
 lsblk
+ls -lR
 iscsiadm -m session -P 3
 cd /var/lib/iscsi/nodes
-mkfs -t xfs /dev/sda
+mkfs -t xfs /dev/sda 
 mkdir /iscsi
-echo "iscsi_UUID /mnt/iscsi xfs _netdev 0 2 >> /etc/exports"
+blkid /dev/sda
+echo "UUID=iscsi_UUID /mnt/iscsi xfs _netdev 0 2 >> /etc/exports"
 mount /mnt/iscsi 
+umoun /mnt/iscsi reboot 
+

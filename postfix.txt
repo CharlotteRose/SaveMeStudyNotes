@@ -1,0 +1,8 @@
+vim /usr/share/doc/postfix/readme/ 
+relayhost
+inet_interfaces
+myorigin 
+mydestination
+local_transport error: local devilery disabled 
+mynetworks 
+systemctl restart postfix

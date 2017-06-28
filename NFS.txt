@@ -1,10 +1,13 @@
-   SERVER 
+ ***********
+ * MAN NFS *
+ ***********
+SERVER 
   (generic)
 yum install nfs-utils 
 systemctl start nfs-server														    #initiate and enable service 
 	^start^enable 
 mkdir /nfs_public																	#create export dir 
-chwon nfsnobody /myshare
+chown write_user /myshare
 echo "/myshare desktop(rw)" >> /etc/exports                                         #edit export info for access 
 exportfs -r 																		#sync /var/lib/nfs/etab with /etc/exports
 firewall-cmd --add-service nfs --permanent  										#permit firewall access 
@@ -19,15 +22,15 @@ echo "test" >> /mnt/nfsshare/test 													#verfiy rw abilities for said use
 cat /mnt/nfsshare/test
 umount /mnt/nfsshare
 ============================================
+
    SERVER
   (secure)
 wget -O /etc/krb5.keytab http://classroom.example.com/pub/keytabs/server1.keytab	#import keytab for auth exchange 
-vi /etc/sysconfg/nfs																#enforce selinux context for export
-	RPCNFSDARGS="-V 4.2"
+vim /etc/sysconfg/nfs																#enforce selinux context for export
+	RPCNFSDARGS="-V 4.2"	mkdir /nfssec 		   																#create export dir
 systemctl start nfs-secure-server													#start & enable secure service 
 ^start^enable  														
-mkdir /nfssec 		   																#create export dir
-echo "/nfssec desktop1(sec=krb5p,rw)' >> /etc/exports"		    					#add export to fstab
+echo "/nfssec example.com(sec=krb5p,rw)' >> /etc/exports"		    				#add export to fstab
 exportfs -r																			#sync /var/lib/nfs/etab with entries in /etc/exports 
 firewall-cmd --add-service nfs --permanent 											#permit firewall access
 firewall-cmd --reload
@@ -41,25 +44,10 @@ systemctl start nfs-secure 															#start & enable secure mount service
 mkdir /mnt/secure   																#create mount point 
 echo "server1:/nfssec /mnt/secure nfs defaults,sec=krb5p,v4.2 0 0" >> /etc/fstab    #mount enforcing selinux contexts 
 mount -a 
+unmount 
+reboot
 
-=============
-TEST SERVER
-echo "test" >>/secureexport/test													#create test file 
-chcon -t public_content_t /secureexport/test										#change selinux context 
-chown ldapuser1:ldapuser1
-chmod 664 /secureexport/test														#give u,g rw access
-
-CLIENT 
-ls -Z /mnt/secure/test
-echo "test" >> /mnt/secureexport/test
-cat /mnt/secureexport/test
-ssh ldapuser@desktop1
-echo "test" >> /mnt/secureexport/test
-cat /mnt/secureexport/test
-
-
-
-https://stackoverflow.com/questions/20585920/how-to-add-multiple-values-to-a-dictionary-key-in-python
+*Fun Note* 
 script in /etc/rc0.d/  
 /etc/init.d 
 	echo "umount -a"
