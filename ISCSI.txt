@@ -1,5 +1,11 @@
+For the following ISCSI example we will be working through the following problem statement: 
+Export a 2GiB iSCSI target from a server. Configure limited access with targeclt ACLs for use only my clientsystemA.domain.example.com. This block device will need to be mounted persistently on the client system.
+
+Please this devices world wide name (wwn) should allow it to be identified via an fibre channel over ethernet (FCoE) network fabric frame (frame of fibre channel protocol). This will result in a name formatted via iqn (iscsi qualified name). 
+The client should persistently mount the target device as an XFS file system on mount directory.
+
 ***************
-*MAN TARGETCLI*  <===== man page to reference during time of crisis 
+*MAN TARGETCLI*  <===== man page for times of crisis 
 ***************
 SERVER 
 yum install targetcli		#install pckg for service 
@@ -9,20 +15,21 @@ systemctl start target		#start & enable service for persistence between boots
 fdisk /dev/vdb - 8e		#create primary partition to be offered as block device 
 pvcreate /dev/vdb1		#create physical volume to allow creation of vg and lv 
 vgcreate vg /dev/vdb1		#create volume group on block device to physival device 
-lvcreate -n lv -l +100%FREE /vg	#create logical volume within volume group specifying logical extents to be allocated to said lv
-targetcli			#enter shell to edit and view config files for target subsystem 
-	cd backstores/block > create iscsi.disk /dev/vdb1	#create storage object 
-	cd /iscsi create iqn 					#export object via network fabric (wwn-world wide name) for node 
-		iqn.yyyy-mm.com.example:server1	
-	cd ../iqn/.../tpg/acls					#define resources an initiator (client) can access
+lvcreate -n lv -l +100%FREE /vg	#create logical volume in vg specifying logical extents to be allocated 
+targetcli			#enter iscsi shell to edit and view config files for target subsystem 
+	cd backstores/block 
+		create iscsi.disk /dev/vdb1	        #create storage object 
+	cd /iscsi 					#define wwn (wwn-world wide name) for node accessd
+		create iqn.yyyy-mm.com.example:server1	  	
+	cd ../iqn/.../tpg/acls				#define resources an initiator (client) can access
 		create iqn.yyyy-mm.com.example:desktop1
-	cd ../luns						#create logical unit number - ie sequenced disk drives 
-		create /backstores/block/server1
-	cd ../portals 						#create ip/port specification for initiator access 
+	cd ../luns					#create logical unit number - ie sequenced disk drives 
+		create /backstores/block/iscsi.disk
+	cd ../portals 					#create ip/port specification for initiator access 
 		create public.ip 
-	saveconfig 						#ensure settings are saved in event of reboot 
+	saveconfig 					#ensure settings are saved in event of reboot 
 	exit
-firwall-cmd --add-port 3260/tcp					#permit access to port so service can be used 
+firwall-cmd --add-port 3260/tcp				#permit access to port so service can be used 
 firewall-cmd --reload
 
 **************
@@ -38,11 +45,10 @@ iscsiadm -m node -T iqn.yyyy-mm.com.example:server1 -p server_ip -l
 lsblk
 ls -lR
 iscsiadm -m session -P 3
-cd /var/lib/iscsi/nodes
 mkfs -t xfs /dev/sda 
 mkdir /iscsi
 blkid /dev/sda
 echo "UUID=iscsi_UUID /mnt/iscsi xfs _netdev 0 2 >> /etc/exports"
 mount /mnt/iscsi 
-umoun /mnt/iscsi reboot 
+umount /mnt/iscsi; reboot
 
