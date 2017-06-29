@@ -1,29 +1,29 @@
 ***************
-*MAN TARGETCLI*
+*MAN TARGETCLI*  <===== man page to reference during time of crisis 
 ***************
-SERVER
-yum install targetcli
-systemctl start target
-^start^enable
+SERVER 
+yum install targetcli		#install pckg for service 
+systemctl start target		#start & enable service for persistence between boots
+^start^enable		
 ^enable^restart
-firwall-cmd --add-port 3260/tcp
-firewall-cmd --reload
-fdisk /dev/vdb - 8e
-pvcreate /dev/vdb1
-vgcreate vg /dev/vdb1
-lvcreate -n lv -l +100%FREE /vg
-targetcli
-	cd backstores/block > create iscsi.disk /dev/vdb1
-	cd /iscsi create iqn 
-		iqn.yyyy-mm.com.example:server1
-	cd ../iqn/.../tpg/acls
+fdisk /dev/vdb - 8e		#create primary partition to be offered as block device 
+pvcreate /dev/vdb1		#create physical volume to allow creation of vg and lv 
+vgcreate vg /dev/vdb1		#create volume group on block device to physival device 
+lvcreate -n lv -l +100%FREE /vg	#create logical volume within volume group specifying logical extents to be allocated to said lv
+targetcli			#enter shell to edit and view config files for target subsystem 
+	cd backstores/block > create iscsi.disk /dev/vdb1	#create storage object 
+	cd /iscsi create iqn 					#export object via network fabric (wwn-world wide name) for node 
+		iqn.yyyy-mm.com.example:server1	
+	cd ../iqn/.../tpg/acls					#define resources an initiator (client) can access
 		create iqn.yyyy-mm.com.example:desktop1
-	cd ../luns
+	cd ../luns						#create logical unit number - ie sequenced disk drives 
 		create /backstores/block/server1
-	cd ../portals 
+	cd ../portals 						#create ip/port specification for initiator access 
 		create public.ip 
-	saveconfig 
+	saveconfig 						#ensure settings are saved in event of reboot 
 	exit
+firwall-cmd --add-port 3260/tcp					#permit access to port so service can be used 
+firewall-cmd --reload
 
 **************
 *MAN ISCSIADM*
