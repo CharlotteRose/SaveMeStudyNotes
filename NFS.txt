@@ -29,7 +29,7 @@ wget -O /etc/krb5.keytab http://classroom.example.com/pub/keytabs/server1.keytab
 vim /etc/sysconfg/nfs																#enforce selinux context for export
 	RPCNFSDARGS="-V 4.2"	mkdir /nfssec 		   																#create export dir
 systemctl start nfs-secure-server													#start & enable secure service 
-^start^enable  														
+^start^enable  													systemctl restart nfs-server 		#restart since config file has been modified 	
 echo "/nfssec example.com(sec=krb5p,rw)' >> /etc/exports"		    				#add export to fstab
 exportfs -r																			#sync /var/lib/nfs/etab with entries in /etc/exports 
 firewall-cmd --add-service nfs --permanent 											#permit firewall access
