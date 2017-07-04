@@ -1,6 +1,6 @@
-The below example addresses the following problem statement :
+example for problem statement :
 
-You have been asked to configure a null client for your Postfix mail server on myserver.domain.com. Your client will need to relay mail through mailrelayhowstwn.com, using client.domain.com as the domain  name on outgoing email.
+Configure a null client for Postfix mail server on myserver.domain.com. Your client will need to relay mail through elayhost.com, using client.domain.com as the domain name on outgoing email.
 
 vim /usr/share/doc/postfix/readme/STANDARD_CONFIGURATION_FILE   #file containing examples for postfix configurations  
 > relayhost mailrelayhost.domain.com   #specify where messages should be routed to 
