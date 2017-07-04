@@ -16,8 +16,9 @@ nmcli con mod team1 ipv4.address 192.168.2.2/24 ipv4.method manual
 nmcli con add type team-slave con-name team0-slave1 ifname eth1 master team1
 nmcli con add type team-slave con-name team0-slave2 ifname eth2 master team1
 -- test 
+nmcli con up team0 
+ping team0 ipv4 
 teamdctl team1 state 
 nmcli dev dis eth{1,2}
   : ping team0 ipv address
-
 *REBOOT* 
