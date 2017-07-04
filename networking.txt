@@ -8,7 +8,7 @@ TEAMING
 ++++++++++++++++++++++++++++++++
 -- master
 nmcli con add type team con-name team0 ifname team0 config '{"runner":{"name":"activebackup"}}' 
-nmcli con mod team1 ipv4.address 192.168.2.2/24 ipv4.method manual 
+nmcli con mod team1 ipv4.address '192.168.2.2/24 ipv4_gw' ipv4.method manual 
 -- slave 
 nmcli con add type team-slave con-name team0-slave1 ifname eth1 master team1
 nmcli con add type team-slave con-name team0-slave2 ifname eth2 master team1
