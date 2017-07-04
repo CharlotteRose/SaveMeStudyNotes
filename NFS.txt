@@ -28,6 +28,7 @@ wget -O /etc/krb5.keytab <address>.keytab
 vim /etc/sysconfig/nfs => -V 4.2 
 systemctl start nfs-secure-server 
 ^start^enable
+systemctl restart nfs-server 
 mkdir /private 
 echo "/private *.example.com(sec=krb5p,rw)">>/etc/exports
 exportfs -r
@@ -43,6 +44,11 @@ mkdir /mnt/private
 echo "server1:/private /mnt/private nfs defaults,v4.2,sec=krb5p 0 0" >> /etc/fstab
 mount -a 	#test read write
 umount ? reboot
+
+TesT
+chown ldapuser:ldapuser /private/file
+chmod 644 /private/file
+chcon -t public_content_t /private/file 
 
 *Fun Note* 
 script in /etc/rc0.d/  
