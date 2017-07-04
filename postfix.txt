@@ -3,10 +3,10 @@ example for problem statement :
 Configure a null client for Postfix mail server on myserver.domain.com. Your client will need to relay mail through elayhost.com, using client.domain.com as the domain name on outgoing email.
 
 vim /usr/share/doc/postfix/readme/STANDARD_CONFIGURATION_FILE   #file containing examples for postfix configurations  
-> relayhost mailrelayhost.domain.com   #specify where messages should be routed to 
-> inet_interfaces loopback-only   #ensure that postfix is listening on loopback only 
-> myorigin = client.domain.com   #fqdn we want mail to be shown it is being sent by
-> mydestination   #goes nowhere so leave it blank 
-> local_transport "error: local devilery disabled"    #share error msg stating locla delivery is diabled 
-> mynetworks    #limit messages forwarded to mailrelayhost with network specifications 
+  > relayhost mailrelayhost.domain.com   #specify where messages should be routed to 
+  > inet_interfaces loopback-only   #ensure that postfix is listening on loopback only 
+  > myorigin = client.domain.com   #fqdn we want mail to be shown it is being sent by
+  > mydestination   #goes nowhere so leave it blank 
+  > local_transport "error: local devilery disabled"    #share error msg stating locla delivery is diabled 
+  > mynetworks  127.0.0.0/8 [::1]/128 #limit messages forwarded to mailrelayhost with network specifications 
 systemctl restart postfix   #restart services to ensure persistence 
