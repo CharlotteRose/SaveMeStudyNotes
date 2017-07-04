@@ -3,49 +3,46 @@
  ***********
 SERVER 
   (generic)
+yum install nfs-utils 		#install pckgs
+systemctl start nfs-server	#start & enable services 
+^start^enable
+mkdir /public
+chown write_user /public 
+echo "/public desktop1(rw)">>/etx/exports
+exportfs -r
+firewall-cmd --add-service nfs --permanent
+fierwall-cmd --reload
+CLIENT
+   (generic) 
 yum install nfs-utils 
-systemctl start nfs-server														    #initiate and enable service 
-	^start^enable 
-mkdir /nfs_public																	#create export dir 
-chown write_user /myshare
-echo "/myshare desktop(rw)" >> /etc/exports                                         #edit export info for access 
-exportfs -r 																		#sync /var/lib/nfs/etab with /etc/exports
-firewall-cmd --add-service nfs --permanent  										#permit firewall access 
-firewall-cmd --reload 
- 
-   CLIENT
-  (generic)
-mkdir -p /mnt/nfsshare																#create mount dir
-echo "server1:/myshare /mnt/nfsshare nfs defaults 0 0"  >> /etc/exports     		#append mount info to /etc/fstab 
-mount -a 																			#verify mounting capabilities 
-echo "test" >> /mnt/nfsshare/test 													#verfiy rw abilities for said user 
-cat /mnt/nfsshare/test
-umount /mnt/nfsshare
+mkdir /mnt/public 
+echo "server1:/public /mnt/public nfs defaults 0 0" >> /etc/fstab
+mount -a 	#follow with write test
+***REBOOT***
+
 ============================================
 
-   SERVER
+SERVER
   (secure)
-wget -O /etc/krb5.keytab http://classroom.example.com/pub/keytabs/server1.keytab	#import keytab for auth exchange 
-vim /etc/sysconfg/nfs																#enforce selinux context for export
-	RPCNFSDARGS="-V 4.2"	mkdir /nfssec 		   																#create export dir
-systemctl start nfs-secure-server													#start & enable secure service 
-^start^enable  													systemctl restart nfs-server 		#restart since config file has been modified 	
-echo "/nfssec example.com(sec=krb5p,rw)' >> /etc/exports"		    				#add export to fstab
-exportfs -r																			#sync /var/lib/nfs/etab with entries in /etc/exports 
-firewall-cmd --add-service nfs --permanent 											#permit firewall access
-firewall-cmd --reload
-
-   CLIENT
-  (secure)
-yum install nfs-utils
-wget -O /etc/krb5.keytab http://classroom.example.com/pub/keytabs/desktop1.keytab   #import keyab for all server/client data exchange
-systemctl start nfs-secure 															#start & enable secure mount service 
+wget -O /etc/krb5.keytab <address>.keytab
+vim /etc/sysconfig/nfs => -V 4.2 
+systemctl start nfs-secure-server 
+^start^enable
+mkdir /private 
+echo "/private *.example.com(sec=krb5p,rw)">>/etc/exports
+exportfs -r
+firewall-cmd --add-service nfs --permanent
+firewall-cmd --reload 
+CLIENT
+   (secure)
+yum install nfs-utils 
+wget -O /etc/krb5.keytab <address>.keytab
+systemctl start nfs-secure
 ^start^enable 
-mkdir /mnt/secure   																#create mount point 
-echo "server1:/nfssec /mnt/secure nfs defaults,sec=krb5p,v4.2 0 0" >> /etc/fstab    #mount enforcing selinux contexts 
-mount -a 
-unmount 
-reboot
+mkdir /mnt/private
+echo "server1:/private /mnt/private nfs defaults,v4.2,sec=krb5p 0 0" >> /etc/fstab
+mount -a 	#test read write
+umount ? reboot
 
 *Fun Note* 
 script in /etc/rc0.d/  
