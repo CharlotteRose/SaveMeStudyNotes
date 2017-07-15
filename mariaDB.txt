@@ -1,6 +1,6 @@
 SERVER 
 yum groupinstall mariadb mariadb-client 		#install pckgs
-vi /etc/my.cf						#disable from listening on all interfaces  			skip-networking=1 
+vi /etc/my.cf						#disable from listening on all interfaces,skip-networking=1 
 systemctl start mariadb											        #start & enable service 
 ^start^enable
 mysql_secure_installation				#configure secure installation
@@ -10,7 +10,7 @@ mysql -u root -p 					#connect ot db (must use -p for password)
 =>CREATE DATABASE <dbname>; 
 =>exit
 mysql -u root -p <dbname> < /mysql/maria.dump		#create db from logical backup 
-mysql -u root -p  										     			#access db
+mysql -u root -p  										   #access db
 =>USE <dbname>; 					#user to verify successful restoration 
 =>SHOW TABLES;															
 =>DESCRIBE <tableName>; 
