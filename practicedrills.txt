@@ -1,0 +1,14 @@
+install httpd httpd-manual 
+start | enable 
+firewall service https 
+firewall http 
+curl /blah /var/www/index.html 
+
+<vhost _defualt_:80
+docroot 
+logs
+servername 
+serveralias
+</vhost> 
+<directory /var/blah 
+require all granted 

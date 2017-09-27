@@ -53,9 +53,6 @@ mount -o multiuser,sec=ntlmssp,username=tim //server1/samba /mnt/multi									#
 		cat /mnt/multi/test 																			#again check steps for the paranoid	
 		exit																							#REMEMBER TO EXIT - smb mounts must be preformed initially by the root user	
 		umount -a 																						#unmount share again for further testing		
-
-echo "username=tim" > /root/smb-passwd																	#create password store file for users to auto authenticate 	
-echo "password=redhat" >> /root/smb-passwd.txt																				
 echo "//server1/samba /mnt/multi cifs credentials=/root/smb-passwd.txt,multiuser,sec=ntlmssp 0 0" \     #add share and mount point to etc fstab for simplified mounting 
 >> etc/fstab	
 mount /mnt/multi 																						#verify mount reads and succeeds with password file and fstab entry	

@@ -1,6 +1,7 @@
 SERVER 
 yum groupinstall mariadb mariadb-client 								#install pckgs
 vi /etc/my.cf															#disable from listening on all interfaces  			
+	[mysqld]
 	skip-networking=1 
 systemctl start mariadb											        #start & enable service 
 ^start^enable
@@ -15,7 +16,7 @@ mysql -u root -p  										     			#access db
 =>USE <dbname>; 												        #user to verify successful restoration 
 =>SHOW TABLES;															
 =>DESCRIBE <tableName>; 
-=>SELECT * <table> WHERE <attribute> {>(=), <(=), =, !=} <value>;
+=>SELECT * FROM <table> WHERE <attribute> {>(=), <(=), =, !=} <value>;
 => show databases; 															
 =>CREATE USER <name@localhost> IDENTIFIED by '<password>';
 =>GRANT SELECT, UPDATE, DELETE, INSERT on <db.table> to user@localhost;

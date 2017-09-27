@@ -1,0 +1,111 @@
+? Maybe not..... 
+? /sbin/nologin 
+? common name /etc/exports
+
+
+- TEAMING -
+nmcli con add type team con-name team1 ifname team1 config '{"runner":{"name":"activebackup"}}'
+nmcli con mod team1 ipv4.addresses <ipv4_address> ipv4.method static 
+nmcli con add type team-slave con-name team1-port1 ifname eth1 master team1
+nmcli con add type team-slave con-name team1-port2 ifname eth2 master team1
+ping -c1 192.168.0.254
+
+- POSTFIX - 
+inet_interfaces
+mynetworks
+mydestination
+relayhost
+local_transport
+firewall-cmd --add-service smtp --permanenet 
+systemctl restart postfix
+^restart^enable
+
+- ISCSI -
+	- SERVER - 
+	yum install targetcli targetd
+	systemctl start targetd
+	^start^enable
+	fdisk /dev/_vdX
+		size - X G,M
+	pvcreate /dev/_vdX
+	vgcreate iscsi_vg /dev/_vdX
+	lvcreate -n iscsi
+	targetcli 
+		cd /backstores/block create server1.iscsi /dev/iscsi_vg/iscsi_lv
+		cd ../../iscsi create wwn=iqn.yyyy-mm.com.domain:server1
+		cd ../../iscsi/.../acls create iqn.yyyy-mm.com.domain:desktop1
+		cd ../../iscsi/.../luns create /backstores/block/server1.iscsi
+		cd ../../iscsi/.../portals create <inet_ip> 3260
+		cd /
+		saveconfig
+	- CLIENT -
+	yum install iscsi-initiator-utils
+	vim /etc/iscsi/initiatorname
+		INITIATORNAME=iqn.yyyy-mm.com.domain:desktop
+	systemctl start iscsi	
+	^start^enable
+	iscsiadm -m discovery -t st -p x.x.x.x
+	iscsiadm -m node -T iqn.yyyy-mm.com.domain:server1
+	lsblk
+	mkfs -t xfs /dev/sda
+	blkid 
+	mkdir /mnt/iscsi
+	echo "UUID=<sda_blkid>  /mnt/iscsi  xfs  _netdev  0  2"
+	mount /mnt/iscsi
+	echo "test" >> /iscsi/test
+			**** configure postfix to allow write time 
+			
+- NFS -
+	- SERVER -
+	yum install nfs-utils
+	wget -O /etc/krb5.keytab http:///file.keytab
+	vim /etc/sysconfig/nfs-utils	
+		...NFS.ARGS " -V 4.2"
+	systemctl start nfs-server
+	^start^enable
+	systemctl start nfs-secure-server
+	^start^enable
+	firewall-cmd --add-service nfs --permanent
+	firewall-cmd --reload
+	mkdir -m1777 /{public,private}
+	echo "/public <domain_ip>(ro)" >> /etc/exports
+	echo "/private <domain_ip>(sec=krb5p,rw)" >> /etc/exports
+	exportfs -r 
+	- CLIENT -
+	yum install nfs-utils -y
+	wget -O /etc/krb5.keytab http:///.keytab
+	systemctl start nfs-server
+	mkdir /mnt/nfsmount 
+	echo "server1:/public  /mnt/nfsmount  defaults 0 2" >> /etc/fstab
+	mount /mnt/nfsmount 
+	echo "test" >> /mnt/nfsmount/test	
+	cat /mnt/nfsmount/test
+    reboot
+
+- SAMBA -
+	- SERVER -
+	yum install samba samba-client 
+	systemctl start smb nmb 
+	^start^enable 
+	firewall-cmd --add-service samba --permanent
+	mkdir /
+	
+
+- MARIADB - 
+yum groupinstall mariadb mariadb-client 
+systemctl start mariadb
+^start^enable'
+curl http:///.mdb >> /tmp/db.dump 
+mysql_secure_installation
+< no password> 
+Y > password
+create databse Contacts;
+create user 'tim'@'localhost' IDENTIFIED by 'password';
+exit
+mysql -u tim -p 
+<password> 
+
+
+		Create a new 512 MiB partition on your secondary hard drive on serverX,
+	then export that over iSCSI using the name iqn.2014-06.com.example:serverX.zoidberg, 
+	but only to clients with the iqn.2014-06.com.example:desktopX initiator name.
