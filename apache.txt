@@ -20,7 +20,18 @@ vim /etc/httpd/conf.d/00-default.conf
 	<Directory> 
 	 Require All granted
 	</Directory> 
-	
-
 
 -- virtual hosts -- site server 
+mkdir /srv/sitename/www
+touch /srv/sitename/www/index.html
+curl <site info> >> /srv/sitename/www/index.html
+restorecon -Rv /srv
+vim /etc/httpd/conf.d/sitename.conf
+	<VirtualHost *:80>
+	 DocumentRoot /srv/sitename/www
+	 ServerName sitename.domain.com
+	 ServerAlias sitename
+	</VirtualHost>
+	<Directory /srv/sitename/www>
+	 Require All granted
+	</Directory> 

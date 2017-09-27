@@ -1,7 +1,7 @@
-For the following ISCSI example we will be working through the following problem statement: 
-Export a 2GiB iSCSI target from a server. Configure limited access with targeclt ACLs for use only my clientsystemA.domain.example.com. This block device will need to be mounted persistently on the client system.
+Example problem statement:
+Export a 2GiB iSCSI target from a server. Configure limited access with targeclt ACLs for use only my client.domain.example.com. This block device will need to be mounted persistently on the client system.
 
-Please this devices world wide name (wwn) should allow it to be identified via an fibre channel over ethernet (FCoE) network fabric frame (frame of fibre channel protocol). This will result in a name formatted via iqn (iscsi qualified name). 
+Please name this devices using a world wide name (wwn). This should allow it to be identified via an fibre channel over ethernet (FCoE) network fabric frame (frame of fibre channel protocol). This will result in a name formatted via iqn (iscsi qualified name). 
 The client should persistently mount the target device as an XFS file system on mount directory.
 
 ***************

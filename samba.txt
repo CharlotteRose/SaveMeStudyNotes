@@ -1,30 +1,30 @@
-yum install samba samba-client 								#install pckgs 
-mkdir -p /smbshare											#mkdir
-groupadd -r marketing  										#add group, -r system only  			
-chgrp marketing /smbshare 									#change group owner ship of file 
-chmod 2775 /smbshare 										#2-group id, 7-owner perms (r,w,x), 7-users in group perms(rwx), 5-perms for all others (r,x)  
-semanage fcontext -a -t samba_share_t '/smbshare(/.*)?'		#set secontext to automaitcally label with smb_share_t with restorecon 
-restorecon -vvFR  /smbshare									#recursuvely set label for all items in dir 
-vi /etc/samba/smb.conf 										#edit the config file 
+yum install samba samba-client		#install pckgs 
+mkdir -p /smbshare			#mkdir
+groupadd -r marketing  			#add group, -r system only  			
+chgrp marketing /smbshare 		#change group owner ship of file 
+chmod 2775 /smbshare 			#2-group id, 7-owner perms (r,w,x), 7-users in group perms(rwx), 5-perms for all others (r,x)  
+semanage fcontext -a -t samba_share_t '/smbshare(/.*)?'	#set secontext 
+restorecon -vvFR  /smbshare		#recursuvely set label for all items in dir 
+vi /etc/samba/smb.conf 			#edit the config file 
   [global]				
-  workgroup = MYCOMPANY										#set appropriate workgroup
-  security = user											#state that only users with valid login creds can access share 			
-  hosts allow = .example.com								#specify which hosts can access share 
-  [smbshare]												#create header for the share 
-  path = /smbshare 											#specify path of share 
-  writable = no												#deny write abilities by default 
-  write list = @marketing,frank                             #specify groups and users that can write 
+  workgroup = MYCOMPANY			#set appropriate workgroup
+  security = user			#state that only users with valid login creds can access share 		
+  hosts allow = .example.com		#specify which hosts can access share 
+  [smbshare]				#create header for the share  
+  path = /smbshare 			#specify path of share 
+  writable = no				#deny write abilities by default 
+  write list = @marketing,frank         #specify groups and users that can write 
   valid users = username 
-testparm 													#test paramater in smb.conf 
-useradd -s /sbin/nologin brian -G marketing 				#add user with no ssh access & part of group 
+testparm 				#test paramater in smb.conf 
+useradd -s /sbin/nologin brian -G marketing  #add user with no ssh access & part of group 
   ^brian^rob
-smbpasswd -a brian (redhat)									#set smbpasswd for said user 
+smbpasswd -a brian (redhat)		#set smbpasswd for said user 
   ^brian^rob
-pdbedit -L 													#list all users 
-systemctl start smb nmb										#start service
-  ^start^enable												#enable service 
-firewall-cmd --add-service samba --permanent 				#enable the service 
-firewall-cmd --reload 										#permit firewall access 
+pdbedit -L 				#list all users 
+systemctl start smb nmb			#start service
+  ^start^enable				#enable service 
+firewall-cmd --add-service samba --permanent #enable the service 
+firewall-cmd --reload 			#permit firewall access 
 id tim
   ^tim^tom 
 
@@ -32,15 +32,16 @@ id tim
  
  CLIENT 
  (single)																			
-yum install cifs-utils 																					#of course need the pckgs to do the things
-mkdir -p /mnt/tim 																						#create dir for mount point (single)
+yum install cifs-utils 			#of course need the pckgs to do the things
+mkdir -p /mnt/tim 			#create dir for mount point (single)
 echo "username=tim" > /root/multi.txt
 echo "password=redhat" >> /root/multi.txt
-mount -o username=user //server1/samba /mnt/tim															#test ability to mount with simple username credentials 			
-echo "test" >> /mnt/tim																					#this test was with write list user - so test write capabilites 
-cat /mnt/tim 																							#cat file to verify contents  	
-umount -a																								#umount share to continue testing and configuration	| test with non write list user
+mount -o username=user //server1/samba /mnt/tim  #test mount with simple username credentials 			
+echo "test" >> /mnt/tim			#this test was with write list user - so test write capabilites 
+cat /mnt/tim 				#cat file to verify contents  	
+umount -a				#umount share | test with non write list user
 mount /mnt/tim
+<<<<<<< HEAD
 
  (multi)																									
 mkdir /mnt/multi																						#create dir for multi user mounts 
@@ -58,3 +59,20 @@ echo "//server1/samba /mnt/multi cifs credentials=/root/smb-passwd.txt,multiuser
 mount /mnt/multi 																						#verify mount reads and succeeds with password file and fstab entry	
 umount -a 																								#unmount for reboot 			
 reboot																									#reboot check for the paranoid 
+=======
+ (multi)												
+mkdir /mnt/multi			#create dir for multi user mounts 
+mount -o multiuser,sec=ntlmssp,username=tim //server1/samba /mnt/multi  #manually test mount with apropriate args #if user is in write list group - write perms inherently exist | to write to file for generic user "cifscred add" must be used (ex below) 			
+su - tom				#su to user in order for cifscreds to add password to keyring   
+cifscreds add server1                   #add password for write abilities for non write list users  
+echo "test" >> /mnt/multi/test	        #test and verify writing capabilites 	
+cat /mnt/multi/test 			#again check steps for the paranoid	
+exit														#REMEMBER TO EXIT - smb mounts must be preformed initially by the root user	
+umount -a 				#unmount share again for further testing		
+echo "username=tim" > /root/smb-passwd	#create password store file for users to auto authenticate 	
+echo "password=redhat" >> /root/smb-passwd.txt									echo "//server1/samba /mnt/multi cifs credentials=/root/smb-passwd.txt,multiuser,sec=ntlmssp 0 0" >> etc/fstab    
+#add share and mount point to etc fstab for simplified mounting 	
+mount /mnt/multi 			#verify mount reads and succeeds with password file and fstab entry	
+umount -a 				#unmount for reboot 			
+reboot					#reboot check for the paranoid 
+>>>>>>> 06b5f2d169c586e52196d0fb4e660168e8c09262

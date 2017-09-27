@@ -1,19 +1,25 @@
 SERVER 
+<<<<<<< HEAD
 yum groupinstall mariadb mariadb-client 								#install pckgs
 vi /etc/my.cf															#disable from listening on all interfaces  			
 	[mysqld]
 	skip-networking=1 
 systemctl start mariadb											        #start & enable service 
+=======
+yum groupinstall mariadb mariadb-client 		#install pckgs
+vi /etc/my.cf						#disable from listening on all interfaces,skip-networking=1 
+systemctl start mariadb										#start & enable service 
+>>>>>>> 06b5f2d169c586e52196d0fb4e660168e8c09262
 ^start^enable
-mysql_secure_installation												#configure secure installation
-firewall-cmd --add-service mysql --permanent 							#permit firewall access
+mysql_secure_installation				#configure secure installation
+firewall-cmd --add-service mysql --permanent 		#permit firewall access
 firewall-cmd --reload 
-mysql -u root -p 														#connect ot db (must use -p for password)
+mysql -u root -p 					#connect ot db (must use -p for password)
 =>CREATE DATABASE <dbname>; 
 =>exit
-mysql -u root -p <dbname> < /mysql/maria.dump							#create db from logical backup 
-mysql -u root -p  										     			#access db
-=>USE <dbname>; 												        #user to verify successful restoration 
+mysql -u root -p <dbname> < /mysql/maria.dump		#create db from logical backup 
+mysql -u root -p  								#access db
+=>USE <dbname>; 					#user to verify successful restoration 
 =>SHOW TABLES;															
 =>DESCRIBE <tableName>; 
 =>SELECT * FROM <table> WHERE <attribute> {>(=), <(=), =, !=} <value>;
